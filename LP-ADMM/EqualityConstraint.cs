@@ -37,6 +37,15 @@ namespace LP_ADMM
             }
         }
 
+        public void AddToVarOptLagrange(Dictionary<Variable, OptVar> dict)
+        {
+            foreach (var (coef, varible) in LHS.Vars)
+            {
+                var optvar = dict[varible];
+                optvar.B += LagrangreMultiplier * coef;
+            }
+        }
+
         public double ResidualAVG()
         {
             return Residual() / LHS.Vars.Count;
@@ -50,10 +59,24 @@ namespace LP_ADMM
             }
             return sum / LHS.Vars.Count;
         }
+
+        public double ResidualLagrange(Dictionary<Variable, double> dictValues)
+        {
+            double sum = LHS.Constant;
+            foreach (var (coef, varible) in LHS.Vars)
+            {
+                sum += (coef * dictValues[varible]);
+            }
+            return sum ;
+        }
         public double Penelty()
         {
             return Residual() * LagrangreMultiplier;
         }
 
+        internal double Peneltylagrange(Dictionary<Variable, double> dictValues)
+        {
+            return ResidualLagrange(dictValues) * LagrangreMultiplier;
+        }
     }
 }

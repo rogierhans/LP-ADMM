@@ -9,8 +9,8 @@ namespace LP_ADMM
     internal class Model
     {
 
-        List<Variable> Variables = new List<Variable>();
-        List<EqualityConstraint> Constraints = new List<EqualityConstraint>();
+        readonly List<Variable> Variables = new ();
+        readonly List<EqualityConstraint> Constraints = new ();
 
         public Variable AddVar(double lb, double up, string name)
         {
@@ -29,7 +29,8 @@ namespace LP_ADMM
 
         public EqualityConstraint AddConstraint(Equality eq, string name)
         {
-            if (eq is EQ dumb) {
+            if (eq is EQ dumb)
+            {
                 return AddConstr(dumb, name);
             }
             if (eq is GEQ lol)
@@ -50,7 +51,7 @@ namespace LP_ADMM
             return constrait;
         }
 
-        public  EqualityConstraint AddConstr(GEQ geq, string name)
+        public EqualityConstraint AddConstr(GEQ geq, string name)
         {
             var newlhs = Combine(geq.LHS, geq.RHS);
             var slack = AddVar(0, double.MaxValue, "slack_" + name);
@@ -58,16 +59,16 @@ namespace LP_ADMM
             var constrait = AddLinearExpression(newlhs, name);
             return constrait;
         }
-        public  EqualityConstraint AddConstr(LEQ lhs, string name)
+        public EqualityConstraint AddConstr(LEQ lhs, string name)
         {
             var newlhs = Combine(lhs.LHS, lhs.RHS);
             var slack = AddVar(0, double.MaxValue, "slack_" + name);
             newlhs.Vars.Add((1, slack));
             var constrait = AddLinearExpression(newlhs, name);
-            return  constrait;
+            return constrait;
         }
 
-        private LinearExperssion Combine(LinearExperssion lhs, LinearExperssion rhs)
+        private static LinearExperssion Combine(LinearExperssion lhs, LinearExperssion rhs)
         {
             var newlhs = lhs.Copy();
             return newlhs + rhs.Flip();
@@ -77,31 +78,67 @@ namespace LP_ADMM
         {
             for (int k = 0; k < 10000; k++)
             {
-              //  Console.WriteLine("--------------------Iteration {0}--------------------", k);
-               // Variables.ForEach(x => Console.WriteLine("{0}: {1}", x.Name, x.Value));
-                Dictionary<Variable, OptVar> dict = new Dictionary<Variable, OptVar>();
-                foreach (var variable in Variables)
-                {
-                    dict[variable] = new OptVar(variable);
-
-                }
-                foreach (var (coef, variable) in Objective.Vars)
-                {
-                    dict[variable].B = coef;
-                }
-
-                foreach (var constraint in Constraints)
-                {
-
-                    constraint.UpdateMultiplier(rho);
-                   // Console.WriteLine("{0}: {1}  \\:{2}", constraint.Name, constraint.LHS.Eval(), constraint.LagrangreMultiplier);
-                    constraint.AddToVarOpt(dict, rho);
-                }
-                Parallel.ForEach(dict, x => { x.Key.Value = x.Value.Optimum(); });
-              //  Console.ReadKey();
+                Iteration(Objective, rho);
             }
-             Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), Objective.Eval() + Constraints.Sum( x => x.Penelty()), Constraints.Sum(x => Math.Abs(x.Residual())));
+            Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
 
+        }
+
+        private void Iteration(LinearExperssion Objective, double rho)
+        {
+            //  Console.WriteLine("--------------------Iteration {0}--------------------", k);
+            // Variables.ForEach(x => Console.WriteLine("{0}: {1}", x.Name, x.Value));
+            Dictionary<Variable, OptVar> dict = new();
+            foreach (var variable in Variables)
+            {
+                dict[variable] = new OptVar(variable);
+
+            }
+            foreach (var (coef, variable) in Objective.Vars)
+            {
+                dict[variable].B = coef;
+            }
+
+            foreach (var constraint in Constraints)
+            {
+
+                constraint.UpdateMultiplier(rho);
+              //   Console.WriteLine("{0}: {1}  \\:{2}", constraint.Name, constraint.LHS.Eval(), constraint.LagrangreMultiplier);
+                constraint.AddToVarOpt(dict, rho);
+            }
+
+            Parallel.ForEach(dict, x => { x.Key.Value = x.Value.Optimum(); });
+            Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
+            //  Console.ReadKey();
+        }
+
+        private double LagrangeIteration(LinearExperssion Objective)
+        {
+            Dictionary<Variable, OptVar> dict = new ();
+            foreach (var variable in Variables)
+            {
+                dict[variable] = new OptVar(variable);
+
+            }
+            foreach (var (coef, variable) in Objective.Vars)
+            {
+                dict[variable].B = coef;
+            }
+
+            foreach (var constraint in Constraints)
+            {
+                constraint.AddToVarOptLagrange(dict);
+            }
+            Dictionary<Variable, double> DictValues = new ();
+            foreach (var (variable,optvar) in dict)
+            { var opt = optvar.Optimum();
+                //Console.WriteLine("{0} {1} {2} {3}", optvar.A,optvar.B,optvar.C, opt);
+                DictValues[variable] =opt ; 
+
+            }
+         //   Console.WriteLine("{0} {1}", Objective.EvalLagrange(DictValues), Constraints.Sum(x => x.Peneltylagrange(DictValues)));
+
+            return Objective.EvalLagrange(DictValues) + Constraints.Sum(x => x.Peneltylagrange(DictValues));
         }
     }
 }

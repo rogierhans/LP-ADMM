@@ -5,7 +5,7 @@ namespace LP_ADMM;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
         var model = new Model();
 
@@ -21,7 +21,7 @@ public class Program
         var objective = -4 * x1 + -3 * x2 + -6 * x3 + -3 * x4 + -4 * x5 + -4 * x6;
         var sw = new Stopwatch();
         sw.Start();
-        model.Solve(objective,0.1);
+        model.Solve(objective,1);
         Console.WriteLine(sw.Elapsed.TotalMilliseconds);
     }
 }

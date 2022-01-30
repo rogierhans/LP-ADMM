@@ -71,5 +71,7 @@ namespace LP_ADMM
 
             throw new NotImplementedException("C# forces me to define this operator");
         }
+
+
     }
 }

@@ -8,10 +8,10 @@ namespace LP_ADMM;
 
 public partial class LinearExperssion
 {
-    public List<(double, Variable)> Vars = new ();
+    public List<(double, Variable)> Vars = new();
     public double Constant;
 
-    public LinearExperssion( double constant)
+    public LinearExperssion(double constant)
     {
         Constant = constant;
     }
@@ -47,6 +47,14 @@ public partial class LinearExperssion
         newLE.Vars = newLE.Vars.Select(x => ((-1) * x.Item1, x.Item2)).ToList();
         return newLE;
     }
-
-
+    internal double EvalLagrange(Dictionary<Variable, double> dictValues)
+    {
+        double sum = Constant;
+        foreach (var (coeff, variable) in Vars)
+        {
+            sum += coeff * dictValues[variable];
+          //  Console.WriteLine(sum);
+        }
+        return sum;
+    }
 }
