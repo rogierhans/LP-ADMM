@@ -27,19 +27,19 @@ namespace LP_ADMM
         }
 
 
-        public EqualityConstraint AddConstraint(Equality eq, string name)
+        public EqualityConstraint AddConstraint(Equality equality, string name)
         {
-            if (eq is EQ dumb)
+            if (equality is EQ eq)
             {
-                return AddConstr(dumb, name);
+                return AddConstr(eq, name);
             }
-            if (eq is GEQ lol)
+            if (equality is GEQ geq)
             {
-                return AddConstr(lol, name);
+                return AddConstr(geq, name);
             }
-            if (eq is LEQ waat)
+            if (equality is LEQ leq)
             {
-                return AddConstr(waat, name);
+                return AddConstr(leq, name);
             }
             throw new Exception("");
         }
@@ -76,11 +76,13 @@ namespace LP_ADMM
 
         internal void Solve(LinearExperssion Objective, double rho)
         {
-            for (int k = 0; k < 10000; k++)
+            for (int k = 0; k < 100000; k++)
             {
+                if(k % 1000 == 0 )
+                    Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
                 Iteration(Objective, rho);
             }
-            Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
+
 
         }
 
@@ -108,7 +110,7 @@ namespace LP_ADMM
             }
 
             Parallel.ForEach(dict, x => { x.Key.Value = x.Value.Optimum(); });
-            Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
+           // Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
             //  Console.ReadKey();
         }
 
