@@ -79,7 +79,7 @@ namespace LP_ADMM
             for (int k = 0; k < 100000; k++)
             {
                 if(k % 1000 == 0 )
-                    Console.WriteLine("Objective: {0} {1} {2}", Objective.Eval(), LagrangeIteration(Objective), Constraints.Sum(x => Math.Abs(x.Residual())));
+                    Console.WriteLine("Objective: {0} {1}", Objective.Eval(), Constraints.Sum(x => Math.Abs(x.Residual())));
                 Iteration(Objective, rho);
             }
 
@@ -105,7 +105,7 @@ namespace LP_ADMM
             {
 
                 constraint.UpdateMultiplier(rho);
-              //   Console.WriteLine("{0}: {1}  \\:{2}", constraint.Name, constraint.LHS.Eval(), constraint.LagrangreMultiplier);
+               //  Console.WriteLine("{0}: {1}  \\:{2}", constraint.Name, constraint.LHS.Eval(), constraint.LagrangreMultiplier);
                 constraint.AddToVarOpt(dict, rho);
             }
 
@@ -114,33 +114,5 @@ namespace LP_ADMM
             //  Console.ReadKey();
         }
 
-        private double LagrangeIteration(LinearExperssion Objective)
-        {
-            Dictionary<Variable, OptVar> dict = new ();
-            foreach (var variable in Variables)
-            {
-                dict[variable] = new OptVar(variable);
-
-            }
-            foreach (var (coef, variable) in Objective.Vars)
-            {
-                dict[variable].B = coef;
-            }
-
-            foreach (var constraint in Constraints)
-            {
-                constraint.AddToVarOptLagrange(dict);
-            }
-            Dictionary<Variable, double> DictValues = new ();
-            foreach (var (variable,optvar) in dict)
-            { var opt = optvar.Optimum();
-                //Console.WriteLine("{0} {1} {2} {3}", optvar.A,optvar.B,optvar.C, opt);
-                DictValues[variable] =opt ; 
-
-            }
-         //   Console.WriteLine("{0} {1}", Objective.EvalLagrange(DictValues), Constraints.Sum(x => x.Peneltylagrange(DictValues)));
-
-            return Objective.EvalLagrange(DictValues) + Constraints.Sum(x => x.Peneltylagrange(DictValues));
-        }
     }
 }

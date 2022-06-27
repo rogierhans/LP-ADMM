@@ -57,7 +57,6 @@ public partial class LinearExperssion
         foreach (var (coeff, variable) in Vars)
         {
             sum += coeff * dictValues[variable];
-          //  Console.WriteLine(sum);
         }
         return sum;
     }

@@ -53,7 +53,7 @@ namespace LP_ADMM
             var newLE = a.Copy();
             newLE.Vars.Add((-1, b));
             return newLE;
-        }
+        } 
         public static LinearExperssion operator -(Variable a, LinearExperssion b)
         {
             var newLE = b.Flip();

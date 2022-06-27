@@ -9,6 +9,15 @@ public class Program
     {
         while (true)
             Test();
+
+        //var rogierVar = new GRBVar();
+        //GRBLinExpr linear = rogierVar;
+        //GRBQuadExpr fromlinear = new GRBQuadExpr(linear);
+        //Console.WriteLine("{0} {1}", linear.Size, fromlinear.Size);
+        //var rogierTest = new GRBQuadExpr();
+        //var rogierLastLine = rogierTest + rogierVar;
+
+
         //var model = new Model();
 
         //var x1 = model.AddVar(0, 100, "x_1");
@@ -56,8 +65,8 @@ public class Program
                 grblinearExperssion += grbvar * coef;
                 LE += coef * variable;
             }
-            grbModel.AddConstr(grblinearExperssion <= rhs, "");
-            model.AddConstraint(LE <= rhs, "");
+            grbModel.AddConstr(grblinearExperssion >= rhs, "");
+            model.AddConstraint(LE >= rhs, "");
         }
         var grbobjective = new GRBLinExpr();
         var objective = new LinearExperssion(0);
@@ -72,7 +81,7 @@ public class Program
         model.Solve(objective, 1);
         foreach (var (grbvar, variable) in list)
         {
-            //  Console.WriteLine("{0} {1}", grbvar.X, variable.Value);
+            Console.WriteLine("{0} {1}", grbvar.X, variable.Value);
         }
         Console.ReadLine();
     }
