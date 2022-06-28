@@ -10,7 +10,7 @@ namespace LP_ADMM
     {
 
         readonly List<Variable> Variables = new ();
-        readonly List<EqualityConstraint> Constraints = new ();
+        readonly List<ADMM_EQ_CONSTRAINT> Constraints = new ();
 
         public Variable AddVar(double lb, double up, string name)
         {
@@ -19,56 +19,42 @@ namespace LP_ADMM
             return Var;
         }
 
-        private EqualityConstraint AddLinearExpression(LinearExperssion lhs, string name)
+        private ADMM_EQ_CONSTRAINT AddLinearExpression(LinearExperssion lhs, string name)
         {
-            var constraint = new EqualityConstraint(lhs, name);
+            var constraint = new ADMM_EQ_CONSTRAINT(lhs, name);
             Constraints.Add(constraint);
             return constraint;
         }
 
 
-        public EqualityConstraint AddConstraint(Equality equality, string name)
+        public ADMM_EQ_CONSTRAINT AddConstraint(Equality equality, string name)
         {
-            if (equality is EQ eq)
+            if (equality.Type == Equality.EQType.EQ)
             {
-                return AddConstr(eq, name);
+                var newlhs = ShiftRHSToLHS(equality.LHS, equality.RHS);
+                var constrait = AddLinearExpression(newlhs, name);
+                return constrait;
             }
-            if (equality is GEQ geq)
+            if (equality.Type == Equality.EQType.GEQ)
             {
-                return AddConstr(geq, name);
+                var newlhs = ShiftRHSToLHS(equality.LHS, equality.RHS);
+                var slack = AddVar(0, double.MaxValue, "slack_" + name);
+                newlhs.Vars.Add((-1, slack));
+                var constrait = AddLinearExpression(newlhs, name);
+                return constrait;
             }
-            if (equality is LEQ leq)
+            if (equality.Type == Equality.EQType.LEQ)
             {
-                return AddConstr(leq, name);
+                var newlhs = ShiftRHSToLHS(equality.LHS, equality.RHS);
+                var slack = AddVar(0, double.MaxValue, "slack_" + name);
+                newlhs.Vars.Add((1, slack));
+                var constrait = AddLinearExpression(newlhs, name);
+                return constrait;
             }
             throw new Exception("");
         }
 
-        public EqualityConstraint AddConstr(EQ geq, string name)
-        {
-            var newlhs = Combine(geq.LHS, geq.RHS);
-            var constrait = AddLinearExpression(newlhs, name);
-            return constrait;
-        }
-
-        public EqualityConstraint AddConstr(GEQ geq, string name)
-        {
-            var newlhs = Combine(geq.LHS, geq.RHS);
-            var slack = AddVar(0, double.MaxValue, "slack_" + name);
-            newlhs.Vars.Add((-1, slack));
-            var constrait = AddLinearExpression(newlhs, name);
-            return constrait;
-        }
-        public EqualityConstraint AddConstr(LEQ lhs, string name)
-        {
-            var newlhs = Combine(lhs.LHS, lhs.RHS);
-            var slack = AddVar(0, double.MaxValue, "slack_" + name);
-            newlhs.Vars.Add((1, slack));
-            var constrait = AddLinearExpression(newlhs, name);
-            return constrait;
-        }
-
-        private static LinearExperssion Combine(LinearExperssion lhs, LinearExperssion rhs)
+        private static LinearExperssion ShiftRHSToLHS(LinearExperssion lhs, LinearExperssion rhs)
         {
             var newlhs = lhs.Copy();
             return newlhs + rhs.Flip();

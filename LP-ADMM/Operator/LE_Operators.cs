@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace LP_ADMM
 {
+#pragma warning disable CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
+#pragma warning disable CS0660 // Type defines operator == or operator != but does not override Object.Equals(object o)
     public partial class LinearExperssion
+#pragma warning restore CS0660 // Type defines operator == or operator != but does not override Object.Equals(object o)
+#pragma warning restore CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
     {
         public static LinearExperssion operator +(LinearExperssion a, LinearExperssion b)
         {
@@ -45,25 +49,27 @@ namespace LP_ADMM
 
         public static Equality operator <=(LinearExperssion one, LinearExperssion two)
         {
-            return new LEQ(one, two);
+
+
+            return new Equality(one, two, Equality.EQType.LEQ);
         }
 
         public static Equality operator <=(LinearExperssion one, double two)
         {
-            return new LEQ(one, new LinearExperssion( two));
+            return new Equality(one, new LinearExperssion(two), Equality.EQType.LEQ);
         }
         public static Equality operator >=(LinearExperssion one, double two)
         {
-            return new GEQ(one, new LinearExperssion( two));
+            return new Equality(one, new LinearExperssion(two), Equality.EQType.GEQ);
         }
         public static Equality operator >=(LinearExperssion one, LinearExperssion two)
         {
-            return new GEQ(one, two);
+            return new Equality(one, two, Equality.EQType.GEQ);
         }
 
         public static Equality operator ==(LinearExperssion one, LinearExperssion two)
         {
-            return new EQ(one, two);
+            return new Equality(one, two, Equality.EQType.EQ);
         }
 
         public static Equality operator !=(LinearExperssion one, LinearExperssion two)

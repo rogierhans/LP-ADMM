@@ -43,7 +43,7 @@ public class Program
         GRBEnv env = new GRBEnv();
         GRBModel grbModel = new GRBModel(env);
         var model = new Model();
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 5; i++)
         {
             var lb = 0;
 
@@ -54,7 +54,7 @@ public class Program
 
             list.Add((grbvar, variable));
         }
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 5; i++)
         {
             var rhs = rng.NextDouble() * 100;
             var grblinearExperssion = new GRBLinExpr();
@@ -79,6 +79,7 @@ public class Program
         grbModel.SetObjective(grbobjective);
         grbModel.Optimize();
         model.Solve(objective, 1);
+        if(grbModel.Status == 2)
         foreach (var (grbvar, variable) in list)
         {
             Console.WriteLine("{0} {1}", grbvar.X, variable.Value);

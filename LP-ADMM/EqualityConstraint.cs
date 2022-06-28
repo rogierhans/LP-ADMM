@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace LP_ADMM
 {
-    internal class EqualityConstraint
+    internal class ADMM_EQ_CONSTRAINT
     {
         public string Name;
         public LinearExperssion LHS;
         public double LagrangreMultiplier = 0;
 
-        public EqualityConstraint(LinearExperssion lHS, string name)
+        public ADMM_EQ_CONSTRAINT(LinearExperssion lHS, string name)
         {
             LHS = lHS;
             Name = name;
